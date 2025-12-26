@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шахтерский Кликер</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+        .game-container {
+            background: #1a252f;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid #f39c12;
+        }
+        .score {
+            font-size: 48px;
+            color: #f39c12;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        }
+        .level-info {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #ecf0f1;
+            border: 1px solid #f39c12;
+        }
+        .stats {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #ecf0f1;
+            border: 1px solid #f39c12;
+        }
+        .mob-container {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #f39c12;
+        }
+        .mob {
+            margin: 10px 0;
+            padding: 10px;
+            background: #34495e;
+            border-radius: 8px;
+            border: 1px solid #f39c12;
+        }
+        .mob-health {
+            width: 100%;
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .mob-health-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .mob-reward {
+            font-size: 12px;
+            color: #f39c12;
+            margin-top: 5px;
+        }
+        .mob-damage-limit {
+            font-size: 11px;
+            color: #e74c3c;
+            margin-top: 3px;
+        }
+        .click-btn {
+            padding: 30px 60px;
+            font-size: 28px;
+            background: linear-gradient(45deg, #e67e22, #f39c12);
+            color: #2c3e50;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+            margin-bottom: 20px;
+            position: relative;
+            font-weight: bold;
+        }
+        .click-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(230, 126, 34, 0.6);
+        }
+        .click-btn:active {
+            transform: scale(0.95);
+        }
+        .shop-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+            margin-bottom: 20px;
+            width: 100%;
+            font-weight: bold;
+        }
+        .shop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.6);
+        }
+        .shop-container {
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+        .shop-container.active {
+            display: block;
+        }
+        .shop h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #f39c12;
+            text-shadow: 0 0 5px rgba(243, 156, 18, 0.5);
+        }
+        .upgrade {
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: #2c3e50;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.3s;
+            position: relative;
+            font-weight: bold;
+        }
+        .upgrade:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .upgrade:disabled {
+            background: #7f8c8d !important;
+            color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .upgrade-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        .upgrade-level {
+            font-size: 11px;
+            color: #34495e;
+            margin-top: 3px;
+        }
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: bold;
+        }
+        .control-btn:hover {
+            background: #95a5a6;
+        }
+        .click-animation {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            font-weight: bold;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+        }
+        .critical-damage {
+            position: fixed;
+            pointer-events: none;
+            font-size: 36px;
+            font-weight: bold;
+            color: #f39c12;
+            animation: criticalDamageFloat 1.5s ease-out forwards;
+            z-index: 1000;
+            text-shadow: 0 0 15px rgba(243, 156, 18, 0.9);
+        }
+        .mob-damage {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.7);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-80px); opacity: 0; }
+        }
+        @keyframes criticalDamageFloat {
+            0% { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translateY(-50px) scale(1.3); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateY(-120px) scale(1); 
+                opacity: 0; 
+            }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #34495e;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            transition: width 0.3s ease;
+        }
+        .miner-icon {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+        .level-progress {
+            width: 100%;
+            height: 10px;
+            background: #34495e;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .level-progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+        }
+        .critical-info {
+            font-size: 12px;
+            color: #f39c12;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="score">⛏️ <span id="score">0</span> золота</div>
+        
+        <div class="level-info">
+            <div>⭐ Уровень: <span id="level">1</span></div>
+            <div>📊 Опыт: <span id="exp">0</span>/<span id="expToNextLevel">100</span></div>
+            <div class="level-progress">
+                <div class="level-progress-fill" id="levelProgress" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div>🗿 Сила кирки: <span id="clickPower">1</span></div>
+            <div>🤖 Авто-шахтеры: <span id="autoClickers">0</span> (+<span id="autoClickPower">0</span>/сек)</div>
+            <div>💥 Крит. шанс: <span id="criticalChance">0%</span> (×<span id="criticalMultiplier">10</span>)</div>
+            <div>🔨 Всего ударов: <span id="totalClicks">0</span></div>
+            <div>💰 Общая добыча: <span id="totalEarned">0</span></div>
+        </div>
+        
+        <div class="mob-container">
+            <h3>👹 Подземные монстры</h3>
+            <div class="mob" id="currentMob">
+                <div><span id="mobIcon">🪨</span> <span id="mobName">Каменный голем</span> <span id="mobLevel">1</span> ур.</div>
+                <div class="mob-health">
+                    <div class="mob-health-fill" id="mobHealthFill" style="width: 100%"></div>
+                </div>
+                <div class="mob-reward">Награда: <span id="mobReward">100</span> золота + <span id="mobExp">20</span> опыта</div>
+                <div class="mob-damage-limit">Лимит урона за удар: <span id="mobDamageLimit">3</span></div>
+            </div>
+            <div>Следующий монстр через: <span id="nextMobTimer">10</span> сек.</div>
+        </div>
+        
+        <button class="click-btn" onclick="addClick(event)">⛏️ КОПАТЬ!</button>
+        
+        <!-- Отдельная кнопка магазина -->
+        <button class="shop-btn" onclick="toggleShop()">🛒 ОТКРЫТЬ ЛАВКУ</button>
+        
+        <!-- Контейнер магазина (изначально скрыт) -->
+        <div class="shop-container" id="shopContainer">
+            <div class="shop">
+                <h3>🛒 Лавка шахтера</h3>
+                
+                <button class="upgrade" onclick="buyUpgrade('autoClicker')" id="autoClickerBtn">
+                    <span class="miner-icon">🤖</span> УДВОИТЕЛЬ ШАХТЕРОВ
+                    <div class="upgrade-info">
+                        <span>Уровень: <span id="autoClickerLevel">0</span></span>
+                        <span>Цена: <span id="autoClickerPrice">100</span> золота</span>
+                    </div>
+                    <div class="upgrade-info">
+                        <span>Добыча: <span id="currentAutoClickerPower">1</span>/сек</span>
+                        <span>Следующий: ×<span id="nextAutoClicker">2</span></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="autoClickerProgress" style="width: 0%"></div>
+                    </div>
+                </button>
+                
+                <button class="upgrade" onclick="buyUpgrade('clickPower')" id="clickPowerBtn">
+                    <span class="miner-icon">⚡</span> Усиление кирки
+                    <div class="upgrade-info">
+                        <span>Уровень: <span id="clickPowerLevel">0</span></span>
+                        <span>Цена: <span id="clickPowerPrice">50</span> золота</span>
+                    </div>
+                    <div class="upgrade-info">
+                        <span>+1 за удар</span>
+                        <span>Следующий: +<span id="nextClickPower">1</span></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="clickPowerProgress" style="width: 0%"></div>
+                    </div>
+                </button>
+                
+                <button class="upgrade" onclick="buyUpgrade('megaClick')" id="megaClickBtn">
+                    <span class="miner-icon">💥</span> Умножитель удара
+                    <div class="upgrade-info">
+                        <span>Уровень: <span id="megaClickLevel">0</span></span>
+                        <span>Цена: <span id="megaClickPrice">200</span> золота</span>
+                    </div>
+                    <div class="upgrade-info">
+                        <span>×2 к силе</span>
+                        <span>Следующий: ×<span id="nextMegaClick">2</span></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="megaClickProgress" style="width: 0%"></div>
+                    </div>
+                </button>
+
+                <button class="upgrade" onclick="buyUpgrade('criticalClick')" id="criticalClickBtn">
+                    <span class="miner-icon">💎</span> Богатая жила
+                    <div class="upgrade-info">
+                        <span>Уровень: <span id="criticalClickLevel">0</span></span>
+                        <span>Цена: <span id="criticalClickPrice">300</span> золота</span>
+                    </div>
+                    <div class="upgrade-info">
+                        <span>Шанс: <span id="currentCriticalChance">0%</span></span>
+                        <span>Следующий: +<span id="nextCriticalChance">1%</span></span>
+                    </div>
+                    <div class="critical-info">
+                        Критический удар наносит ×10 урона (с учетом лимита)!
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="criticalClickProgress" style="width: 0%"></div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="control-buttons">
+                <button class="control-btn" onclick="saveGame()">💾 Сохранить</button>
+                <button class="control-btn" onclick="resetGame()">🔄 Сбросить</button>
+                <button class="control-btn" onclick="exportSave()">📤 Экспорт</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdvancedClickerGame {
+            constructor() {
+                // Основные показатели
+                this.score = 0;
+                this.totalClicks = 0;
+                this.totalEarned = 0;
+                this.baseClickPower = 1; // Базовый клик = 1
+                
+                // Система уровней
+                this.level = 1;
+                this.exp = 0;
+                this.expToNextLevel = 100;
+                
+                // Система мобов
+                this.currentMob = null;
+                this.mobSpawnTimer = 0;
+                this.mobSpawnInterval = 10; // секунды
+                this.mobsDefeated = 0;
+                
+                // Система критического урона
+                this.criticalMultiplier = 10; // ×10 урона при критическом ударе
+                
+                // Типы мобов
+                this.mobTypes = [
+                    { name: "Каменный голем", icon: "🪨", color: "#95a5a6" },
+                    { name: "Огненный элементаль", icon: "🔥", color: "#e74c3c" },
+                    { name: "Ледяной призрак", icon: "❄️", color: "#3498db" },
+                    { name: "Земляной червь", icon: "🐛", color: "#27ae60" },
+                    { name: "Темный демон", icon: "👿", color: "#8e44ad" },
+                    { name: "Кристальный дракон", icon: "🐉", color: "#9b59b6" },
+                    { name: "Древний титан", icon: "🗿", color: "#7f8c8d" },
+                    { name: "Бессмертный феникс", icon: "🦅", color: "#e67e22" }
+                ];
+                
+                // Система улучшений с прогрессивными ценами
+                this.upgrades = {
+                    autoClicker: {
+                        level: 0,
+                        basePrice: 100,
+                        currentPrice: 100,
+                        basePower: 1,
+                        type: 'exponential'
+                    },
+                    clickPower: {
+                        level: 0,
+                        basePrice: 50,
+                        currentPrice: 50,
+                        power: 1,
+                        type: 'additive'
+                    },
+                    megaClick: {
+                        level: 0,
+                        basePrice: 200,
+                        currentPrice: 200,
+                        power: 2,
+                        type: 'multiplier'
+                    },
+                    criticalClick: {
+                        level: 0,
+                        basePrice: 300,
+                        currentPrice: 300,
+                        power: 0.01, // +1% за уровень
+                        baseChance: 0, // начальный шанс 0%
+                        type: 'critical'
+                    }
+                };
+                
+                this.loadGame();
+                
+                // Запускаем автокликеры
+                setInterval(() => {
+                    const autoClickersPower = this.getAutoClickerPower();
+                    if (autoClickersPower > 0) {
+                        this.score += autoClickersPower;
+                        this.totalEarned += autoClickersPower;
+                        this.updateDisplay();
+                        this.saveGame();
+                    }
+                }, 1000);
+                
+                // Система мобов
+                setInterval(() => {
+                    this.updateMobSystem();
+                }, 1000);
+
+                // Автосохранение каждые 10 секунд
+                setInterval(() => {
+                    this.saveGame();
+                }, 10000);
+                
+                // Инициализация первого моба
+                if (!this.currentMob) {
+                    this.spawnMob();
+                }
+            }
+            
+            addClick() {
+                let baseEarned = this.baseClickPower;
+                
+                // Добавляем силу клика от улучшения
+                baseEarned += this.upgrades.clickPower.level * this.upgrades.clickPower.power;
+                
+                // Применяем множитель
+                const multiplier = this.upgrades.megaClick.level > 0 ? 
+                    Math.pow(this.upgrades.megaClick.power, this.upgrades.megaClick.level) : 1;
+                
+                let earned = baseEarned * multiplier;
+                let isCritical = false;
+                
+                // Проверяем критический удар
+                if (this.upgrades.criticalClick.level > 0) {
+                    const criticalChance = this.getCurrentCriticalChance() / 100;
+                    if (Math.random() < criticalChance) {
+                        earned *= this.criticalMultiplier;
+                        isCritical = true;
+                    }
+                }
+                
+                this.score += earned;
+                this.totalClicks++;
+                this.totalEarned += earned;
+                
+                // Атака моба, если он есть
+                if (this.currentMob) {
+                    this.attackMob(earned, isCritical);
+                }
+                
+                this.saveGame();
+                
+                return { earned, isCritical };
+            }
+            
+            buyUpgrade(type) {
+                const upgrade = this.upgrades[type];
+                
+                if (this.score >= upgrade.currentPrice) {
+                    this.score -= upgrade.currentPrice;
+                    upgrade.level += 1;
+                    
+                    // Увеличиваем цену в 3 раза для следующего уровня
+                    upgrade.currentPrice = Math.floor(upgrade.basePrice * Math.pow(3, upgrade.level));
+                    
+                    this.saveGame();
+                    this.updateDisplay();
+                    return true;
+                }
+                return false;
+            }
+            
+            getAutoClickerPower() {
+                const upgrade = this.upgrades.autoClicker;
+                // Экспоненциальный рост: 1, 2, 4, 8, 16, 32...
+                return upgrade.level > 0 ? Math.pow(2, upgrade.level - 1) : 0;
+            }
+            
+            getNextAutoClickerPower() {
+                const upgrade = this.upgrades.autoClicker;
+                // Следующий уровень будет в 2 раза больше текущего
+                return upgrade.level > 0 ? Math.pow(2, upgrade.level) : 1;
+            }
+            
+            getUpgradeEffect(type) {
+                const upgrade = this.upgrades[type];
+                switch(type) {
+                    case 'autoClicker':
+                        return `×2 к силе`;
+                    case 'clickPower':
+                        return `+${upgrade.power} за удар`;
+                    case 'megaClick':
+                        return `×${upgrade.power} к силе`;
+                    case 'criticalClick':
+                        return `${this.getCurrentCriticalChance().toFixed(1)}% шанс ×${this.criticalMultiplier}`;
+                    default:
+                        return '';
+                }
+            }
+            
+            getNextUpgradeEffect(type) {
+                const upgrade = this.upgrades[type];
+                switch(type) {
+                    case 'autoClicker':
+                        return '2';
+                    case 'clickPower':
+                        return upgrade.power;
+                    case 'megaClick':
+                        return upgrade.power;
+                    case 'criticalClick':
+                        return `${(upgrade.power * 100).toFixed(1)}%`;
+                    default:
+                        return '';
+                }
+            }
+            
+            getProgressPercentage(type) {
+                const upgrade = this.upgrades[type];
+                const nextPrice = upgrade.currentPrice;
+                if (this.score >= nextPrice) return 100;
+                return Math.min(100, (this.score / nextPrice) * 100);
+            }
+            
+            getTotalClickPower() {
+                let base = this.baseClickPower;
+                base += this.upgrades.clickPower.level * this.upgrades.clickPower.power;
+                
+                const multiplier = this.upgrades.megaClick.level > 0 ? 
+                    Math.pow(this.upgrades.megaClick.power, this.upgrades.megaClick.level) : 1;
+                
+                return base * multiplier;
+            }
+            
+            getCurrentCriticalChance() {
+                const upgrade = this.upgrades.criticalClick;
+                // Начальный шанс 0% + 1% за каждый уровень
+                return (upgrade.baseChance * 100) + (upgrade.level * upgrade.power * 100);
+            }
+            
+            getNextCriticalChance() {
+                const upgrade = this.upgrades.criticalClick;
+                // Следующий уровень добавит 1%
+                return (upgrade.power * 100).toFixed(1);
+            }
+            
+            // Система уровней
+            addExp(amount) {
+                this.exp += amount;
+                
+                // Проверяем повышение уровня
+                while (this.exp >= this.expToNextLevel) {
+                    this.exp -= this.expToNextLevel;
+                    this.levelUp();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            levelUp() {
+                this.level += 1;
+                this.expToNextLevel = Math.floor(100 * Math.pow(1.5, this.level - 1));
+                
+                // Бонусы за уровень
+                this.score += this.level * 20; // Бонус золота
+                
+                // Уведомление о повышении уровня
+                this.showLevelUpNotification();
+            }
+            
+            showLevelUpNotification() {
+                // Создаем уведомление о повышении уровня
+                const notification = document.createElement('div');
+                notification.className = 'click-animation';
+                notification.textContent = `🎉 Уровень ${this.level}!`;
+                notification.style.color = '#3498db';
+                notification.style.fontSize = '32px';
+                notification.style.textShadow = '0 0 10px rgba(52, 152, 219, 0.7)';
+                notification.style.left = '50%';
+                notification.style.top = '50%';
+                notification.style.transform = 'translate(-50%, -50%)';
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 2000);
+            }
+            
+            // Система мобов
+            spawnMob() {
+                const mobLevel = Math.max(1, Math.floor(this.level / 2) + Math.floor(Math.random() * 3));
+                
+                // Выбираем случайного моба из доступных для этого уровня
+                const availableMobs = this.mobTypes.slice(0, Math.min(this.mobTypes.length, Math.floor(mobLevel / 2) + 1));
+                const mobType = availableMobs[Math.floor(Math.random() * availableMobs.length)];
+                
+                // Мобы становятся сильнее с уровнем
+                const mobHealth = Math.floor(200 * Math.pow(2.5, mobLevel - 1));
+                const mobReward = Math.floor(100 * Math.pow(1.8, mobLevel - 1));
+                const mobExp = Math.floor(20 * Math.pow(1.4, mobLevel - 1));
+                const damageLimit = 3; // Максимум 3 урона за удар
+                
+                this.currentMob = {
+                    level: mobLevel,
+                    health: mobHealth,
+                    maxHealth: mobHealth,
+                    reward: mobReward,
+                    exp: mobExp,
+                    damageLimit: damageLimit,
+                    type: mobType
+                };
+                
+                this.mobSpawnTimer = this.mobSpawnInterval;
+                this.updateDisplay();
+            }
+            
+            attackMob(damage, isCritical) {
+                if (!this.currentMob) return;
+                
+                let actualDamage = damage;
+                
+                // Ограничиваем урон для ВСЕХ атак (включая критические)
+                if (actualDamage > this.currentMob.damageLimit) {
+                    actualDamage = this.currentMob.damageLimit;
+                }
+                
+                // Если это критический удар, применяем множитель в пределах лимита
+                if (isCritical) {
+                    // Вычисляем базовый урон без множителей
+                    let baseDamage = this.baseClickPower;
+                    baseDamage += this.upgrades.clickPower.level * this.upgrades.clickPower.power;
+                    
+                    // Применяем только базовые множители (без критического)
+                    const multiplier = this.upgrades.megaClick.level > 0 ? 
+                        Math.pow(this.upgrades.megaClick.power, this.upgrades.megaClick.level) : 1;
+                    
+                    baseDamage = baseDamage * multiplier;
+                    
+                    // Ограничиваем базовый урон
+                    if (baseDamage > this.currentMob.damageLimit) {
+                        baseDamage = this.currentMob.damageLimit;
+                    }
+                    
+                    // Применяем критический множитель к ограниченному базовому урону
+                    actualDamage = baseDamage * this.criticalMultiplier;
+                    
+                    // Снова ограничиваем итоговый урон
+                    if (actualDamage > this.currentMob.damageLimit) {
+                        actualDamage = this.currentMob.damageLimit;
+                    }
+                }
+                
+                this.currentMob.health -= actualDamage;
+                
+                // Создаем анимацию урона по мобу
+                this.createMobDamageAnimation(actualDamage, isCritical);
+                
+                // Проверяем, побежден ли моб
+                if (this.currentMob.health <= 0) {
+                    this.defeatMob();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            defeatMob() {
+                // Награда за победу над мобом
+                this.score += this.currentMob.reward;
+                this.totalEarned += this.currentMob.reward;
+                this.addExp(this.currentMob.exp);
+                this.mobsDefeated += 1;
+                
+                // Уведомление о победе
+                this.showMobDefeatedNotification(this.currentMob.reward, this.currentMob.exp);
+                
+                // Убираем моба
+                this.currentMob = null;
+            }
+            
+            showMobDefeatedNotification(reward, exp) {
+                const notification = document.createElement('div');
+                notification.className = 'click-animation';
+                notification.textContent = `👹 Моб побежден! +${this.formatNumber(reward)} золота +${this.formatNumber(exp)} опыта`;
+                notification.style.color = '#f39c12';
+                notification.style.fontSize = '20px';
+                notification.style.textShadow = '0 0 10px rgba(243, 156, 18, 0.7)';
+                notification.style.left = '50%';
+                notification.style.top = '60%';
+                notification.style.transform = 'translate(-50%, -50%)';
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 2000);
+            }
+            
+            createMobDamageAnimation(damage, isCritical) {
+                const mobElement = document.getElementById('currentMob');
+                const rect = mobElement.getBoundingClientRect();
+                
+                const animation = document.createElement('div');
+                animation.className = isCritical ? 'critical-damage' : 'mob-damage';
+                animation.textContent = `-${this.formatNumber(damage)}`;
+                animation.style.left = (rect.left + rect.width / 2) + 'px';
+                animation.style.top = (rect.top + rect.height / 2) + 'px';
+                
+                if (isCritical) {
+                    animation.style.color = '#f39c12';
+                    animation.style.textShadow = '0 0 15px rgba(243, 156, 18, 0.9)';
+                }
+                
+                document.body.appendChild(animation);
+                
+                setTimeout(() => {
+                    document.body.removeChild(animation);
+                }, isCritical ? 1500 : 1000);
+            }
+            
+            updateMobSystem() {
+                if (this.currentMob) {
+                    // Моб уже есть, ничего не делаем
+                    return;
+                }
+                
+                // Уменьшаем таймер появления моба
+                this.mobSpawnTimer -= 1;
+                
+                // Если таймер истек, создаем нового моба
+                if (this.mobSpawnTimer <= 0) {
+                    this.spawnMob();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            saveGame() {
+                const saveData = {
+                    score: this.score,
+                    totalClicks: this.totalClicks,
+                    totalEarned: this.totalEarned,
+                    level: this.level,
+                    exp: this.exp,
+                    expToNextLevel: this.expToNextLevel,
+                    mobsDefeated: this.mobsDefeated,
+                    upgrades: this.upgrades,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('clickerSave', JSON.stringify(saveData));
+            }
+            
+            loadGame() {
+                const save = localStorage.getItem('clickerSave');
+                if (save) {
+                    try {
+                        const data = JSON.parse(save);
+                        this.score = data.score || 0;
+                        this.totalClicks = data.totalClicks || 0;
+                        this.totalEarned = data.totalEarned || 0;
+                        this.level = data.level || 1;
+                        this.exp = data.exp || 0;
+                        this.expToNextLevel = data.expToNextLevel || 100;
+                        this.mobsDefeated = data.mobsDefeated || 0;
+                        
+                        // Загружаем улучшения
+                        if (data.upgrades) {
+                            for (const type in data.upgrades) {
+                                if (this.upgrades[type]) {
+                                    this.upgrades[type].level = data.upgrades[type].level || 0;
+                                    this.upgrades[type].currentPrice = data.upgrades[type].currentPrice || 
+                                        Math.floor(this.upgrades[type].basePrice * Math.pow(3, this.upgrades[type].level));
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Ошибка загрузки сохранения:', e);
+                    }
+                }
+            }
+            
+            resetGame() {
+                if (confirm('Вы уверены, что хотите сбросить весь прогресс?')) {
+                    this.score = 0;
+                    this.totalClicks = 0;
+                    this.totalEarned = 0;
+                    this.level = 1;
+                    this.exp = 0;
+                    this.expToNextLevel = 100;
+                    this.mobsDefeated = 0;
+                    this.currentMob = null;
+                    this.mobSpawnTimer = this.mobSpawnInterval;
+                    
+                    // Сбрасываем улучшения
+                    for (const type in this.upgrades) {
+                        this.upgrades[type].level = 0;
+                        this.upgrades[type].currentPrice = this.upgrades[type].basePrice;
+                    }
+                    
+                    this.saveGame();
+                    this.updateDisplay();
+                    this.spawnMob();
+                }
+            }
+            
+            updateDisplay() {
+                // Обновляем основные показатели
+                document.getElementById('score').textContent = this.formatNumber(this.score);
+                document.getElementById('totalClicks').textContent = this.formatNumber(this.totalClicks);
+                document.getElementById('totalEarned').textContent = this.formatNumber(this.totalEarned);
+                
+                // Обновляем статистику
+                const autoClickersPower = this.getAutoClickerPower();
+                const totalClickPower = this.getTotalClickPower();
+                
+                document.getElementById('clickPower').textContent = this.formatNumber(totalClickPower);
+                document.getElementById('autoClickers').textContent = this.upgrades.autoClicker.level;
+                document.getElementById('autoClickPower').textContent = this.formatNumber(autoClickersPower);
+                document.getElementById('criticalChance').textContent = `${this.getCurrentCriticalChance().toFixed(1)}%`;
+                document.getElementById('criticalMultiplier').textContent = this.criticalMultiplier;
+                
+                // Обновляем информацию об уровнях
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('exp').textContent = this.formatNumber(this.exp);
+                document.getElementById('expToNextLevel').textContent = this.formatNumber(this.expToNextLevel);
+                
+                const levelProgress = (this.exp / this.expToNextLevel) * 100;
+                document.getElementById('levelProgress').style.width = `${levelProgress}%`;
+                
+                // Обновляем информацию о мобах
+                if (this.currentMob) {
+                    document.getElementById('mobIcon').textContent = this.currentMob.type.icon;
+                    document.getElementById('mobName').textContent = this.currentMob.type.name;
+                    document.getElementById('mobLevel').textContent = this.currentMob.level;
+                    const healthPercent = (this.currentMob.health / this.currentMob.maxHealth) * 100;
+                    document.getElementById('mobHealthFill').style.width = `${healthPercent}%`;
+                    document.getElementById('mobHealthFill').style.background = `linear-gradient(45deg, ${this.currentMob.type.color}, #c0392b)`;
+                    document.getElementById('mobReward').textContent = this.formatNumber(this.currentMob.reward);
+                    document.getElementById('mobExp').textContent = this.formatNumber(this.currentMob.exp);
+                    document.getElementById('mobDamageLimit').textContent = this.currentMob.damageLimit;
+                    document.getElementById('nextMobTimer').textContent = '--';
+                } else {
+                    document.getElementById('mobHealthFill').style.width = '0%';
+                    document.getElementById('nextMobTimer').textContent = this.mobSpawnTimer;
+                }
+                
+                // Обновляем информацию об улучшениях
+                for (const type in this.upgrades) {
+                    const upgrade = this.upgrades[type];
+                    
+                    document.getElementById(`${type}Level`).textContent = upgrade.level;
+                    document.getElementById(`${type}Price`).textContent = this.formatNumber(upgrade.currentPrice);
+                    
+                    // Обновляем прогресс
+                    document.getElementById(`${type}Progress`).style.width = 
+                        `${this.getProgressPercentage(type)}%`;
+                    
+                    // Обновляем состояние кнопок
+                    const button = document.getElementById(`${type}Btn`);
+                    const canAfford = this.score >= upgrade.currentPrice;
+                    button.disabled = !canAfford;
+                    
+                    // Принудительно устанавливаем стиль для отключенной кнопки
+                    if (!canAfford) {
+                        button.style.background = '#7f8c8d';
+                    } else {
+                        button.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+                    }
+                }
+                
+                // Особое обновление для критического удара
+                document.getElementById('currentCriticalChance').textContent = 
+                    `${this.getCurrentCriticalChance().toFixed(1)}%`;
+                document.getElementById('nextCriticalChance').textContent = 
+                    `${this.getNextCriticalChance()}%`;
+                
+                // Обновляем силу автокликера
+                document.getElementById('currentAutoClickerPower').textContent = this.formatNumber(this.getAutoClickerPower());
+                document.getElementById('nextAutoClicker').textContent = this.getNextUpgradeEffect('autoClicker');
+                
+                // Обновляем остальные эффекты
+                document.getElementById('nextClickPower').textContent = this.getNextUpgradeEffect('clickPower');
+                document.getElementById('nextMegaClick').textContent = this.getNextUpgradeEffect('megaClick');
+            }
+            
+            formatNumber(num) {
+                if (num >= 1000000000) { // 1 миллиард и больше
+                    return (num / 1000000000).toFixed(2) + 'B';
+                }
+                if (num >= 1000000) { // 1 миллион и больше
+                    return (num / 1000000).toFixed(2) + 'M';
+                }
+                if (num >= 1000) { // 1 тысяча и больше
+                    return (num / 1000).toFixed(1) + 'K';
+                }
+                return Math.floor(num).toString();
+            }
+            
+            exportSave() {
+                const saveData = {
+                    score: this.score,
+                    totalClicks: this.totalClicks,
+                    totalEarned: this.totalEarned,
+                    level: this.level,
+                    exp: this.exp,
+                    expToNextLevel: this.expToNextLevel,
+                    mobsDefeated: this.mobsDefeated,
+                    upgrades: this.upgrades,
+                    timestamp: Date.now()
+                };
+                const saveString = btoa(JSON.stringify(saveData));
+                prompt('Ваш код сохранения (скопируйте его):', saveString);
+            }
+            
+            importSave(saveString) {
+                try {
+                    const saveData = JSON.parse(atob(saveString));
+                    this.score = saveData.score || 0;
+                    this.totalClicks = saveData.totalClicks || 0;
+                    this.totalEarned = saveData.totalEarned || 0;
+                    this.level = saveData.level || 1;
+                    this.exp = saveData.exp || 0;
+                    this.expToNextLevel = saveData.expToNextLevel || 100;
+                    this.mobsDefeated = saveData.mobsDefeated || 0;
+                    
+                    if (saveData.upgrades) {
+                        for (const type in saveData.upgrades) {
+                            if (this.upgrades[type]) {
+                                this.upgrades[type].level = saveData.upgrades[type].level || 0;
+                                this.upgrades[type].currentPrice = saveData.upgrades[type].currentPrice || 
+                                    Math.floor(this.upgrades[type].basePrice * Math.pow(3, this.upgrades[type].level));
+                            }
+                        }
+                    }
+                    
+                    this.saveGame();
+                    this.updateDisplay();
+                    return true;
+                } catch (e) {
+                    alert('Неверный код сохранения!');
+                    return false;
+                }
+            }
+        }
+
+        const game = new AdvancedClickerGame();
+
+        // Функция для открытия/закрытия магазина
+        function toggleShop() {
+            const shopContainer = document.getElementById('shopContainer');
+            const shopBtn = document.querySelector('.shop-btn');
+            
+            if (shopContainer.classList.contains('active')) {
+                shopContainer.classList.remove('active');
+                shopBtn.textContent = '🛒 ОТКРЫТЬ ЛАВКУ';
+                shopBtn.style.background = 'linear-gradient(45deg, #3498db, #2980b9)';
+            } else {
+                shopContainer.classList.add('active');
+                shopBtn.textContent = '✖️ ЗАКРЫТЬ ЛАВКУ';
+                shopBtn.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+            }
+            
+            // Обновляем состояние кнопок при открытии магазина
+            game.updateDisplay();
+        }
+
+        function addClick(event) {
+            const result = game.addClick();
+            game.updateDisplay();
+            
+            // Создаем анимацию клика с правильным значением и цветом
+            createClickAnimation(event, result.earned, result.isCritical);
+        }
+
+        function createClickAnimation(event, amount, isCritical) {
+            const animation = document.createElement('div');
+            
+            if (isCritical) {
+                // Критический удар - крупнее и золотой
+                animation.className = 'critical-damage';
+                animation.textContent = `+${game.formatNumber(amount)}`;
+                animation.style.color = '#f39c12';
+                animation.style.textShadow = '0 0 15px rgba(243, 156, 18, 0.9)';
+            } else {
+                // Обычный удар - черный цвет
+                animation.className = 'click-animation';
+                animation.textContent = `+${game.formatNumber(amount)}`;
+                animation.style.color = '#000000';
+                animation.style.textShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+            }
+            
+            animation.style.left = (event.clientX - 20) + 'px';
+            animation.style.top = (event.clientY - 20) + 'px';
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                document.body.removeChild(animation);
+            }, isCritical ? 1500 : 1000);
+        }
+
+        function buyUpgrade(type) {
+            const success = game.buyUpgrade(type);
+            if (success) {
+                // Визуальная обратная связь
+                const btn = document.getElementById(type + 'Btn');
+                btn.style.background = 'linear-gradient(45deg, #3498db, #2980b9)';
+                setTimeout(() => {
+                    // После анимации возвращаем нормальный цвет, если можно купить
+                    const upgrade = game.upgrades[type];
+                    const canAfford = game.score >= upgrade.currentPrice;
+                    if (canAfford) {
+                        btn.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+                    } else {
+                        btn.style.background = '#7f8c8d';
+                    }
+                }, 200);
+            }
+            game.updateDisplay();
+        }
+
+        function saveGame() {
+            game.saveGame();
+            alert('Игра сохранена!');
+        }
+
+        function resetGame() {
+            game.resetGame();
+        }
+
+        function exportSave() {
+            game.exportSave();
+        }
+
+        // Добавляем форматирование чисел в глобальную область видимости
+        window.formatNumber = function(num) {
+            return game.formatNumber(num);
+        };
+
+        // Функция для импорта сохранения
+        window.importSave = function(saveString) {
+            return game.importSave(saveString);
+        };
+
+        // Инициализация отображения
+        game.updateDisplay();
+    </script>
+</body>
+</html>
