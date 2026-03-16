@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title mb-4">{{ book.title }}</h2>
+
+        <div class="mb-4">
+            <p class="mb-2"><strong>Номер:</strong> {{ book.id }}</p>
+            <p class="mb-2"><strong>Автор:</strong> {{ book.author }}</p>
+            {% if book.year %}
+                <p class="mb-2"><strong>Год издания:</strong> {{ book.year }}</p>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+</div>
+{% endblock %}

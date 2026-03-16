@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card shadow-sm mt-5">
+            <div class="card-body p-5">
+                <h1 class="display-4 mb-4">Привет</h1>
+                <p class="lead mb-4">тут есть много книг</p>
+
+                <div class="card-body">
+                            <h5 class="card-title"> Статистика</h5>
+                            <p class="card-text display-6">{{ books|length if books else 0 }}</p>
+                            <p class="text-muted">книг в каталоге</p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('books_list') }}" class="btn btn-primary btn-lg me-2">Посмотреть книги</a>
+                    {% if not session.logged_in %}
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Войти</a>
+                    {% else %}
+                        <a href="{{ url_for('add_book') }}" class="btn btn-outline-primary btn-lg">Добавить книгу</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
